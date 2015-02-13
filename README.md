@@ -1,6 +1,6 @@
 CSRFBanana
 ==========
-[![Build Status](https://travis-ci.org/josephspurrier/csrfbanana.svg)](https://travis-ci.org/josephspurrier/csrfbanana) [![Coverage Status](https://coveralls.io/repos/josephspurrier/csrfbanana/badge.png)](https://coveralls.io/r/josephspurrier/csrfbanana) [![GoDoc](https://godoc.org/github.com/josephspurrier/csrfbanana?status.svg)](https://godoc.org/github.com/josephspurrier/csrfbanana)
+[![Build Status](https://travis-ci.org/josephspurrier/csrfbanana.svg)](https://travis-ci.org/josephspurrier/csrfbanana) [![Coverage Status](https://coveralls.io/repos/josephspurrier/csrfbanana/badge.svg)](https://coveralls.io/r/josephspurrier/csrfbanana) [![GoDoc](https://godoc.org/github.com/josephspurrier/csrfbanana?status.svg)](https://godoc.org/github.com/josephspurrier/csrfbanana)
 
 CSRF Protection for [gorilla/sessions](http://www.gorillatoolkit.org/pkg/sessions) in the Go Language
 
