@@ -21,7 +21,7 @@ import (
 var (
 	TokenLength = 32      // Length of the token
 	TokenName   = "token" // Name of the token in the session variables
-	SingleToken = false
+	SingleToken = false   // True is one token for entire session, false is unique token for each URL
 )
 
 // Clear will remove all the tokens. Call after a permission change.
