@@ -4,7 +4,9 @@ CSRFBanana
 
 CSRF Protection for [gorilla/sessions](http://www.gorillatoolkit.org/pkg/sessions) in the Go Language
 
-CSRFBanana is a middleware package that helps prevent cross-site request forgery attacks. The package can generate tokens per session or per page. Tokens can also be regenerated after a successful or failed attempt to validate. The tokens are stored in the cookie controlled by gorilla/sessions so you only have to manage a single cookie.
+CSRFBanana is a middleware package that helps prevent cross-site request forgery attacks. The package can generate tokens per session or per page. Tokens can also be regenerated after a successful or failed attempt to validate.
+
+In this package, the CSRF tokens are stored in the (same) session cookie that is handled by gorilla/sessions. You can read about the different CSRF approaches on StackOverflow: [Why is it common to put CSRF prevention tokens in cookies?](http://stackoverflow.com/a/20518324)
 
 ## Usage
 
@@ -58,18 +60,20 @@ vars["token"] = csrfbanana.Token(w, r, sess)
 templ.Execute(w, vars)
 ~~~
 
-Add the token to every form that is not excluded by ExcludeRegexPaths:
+Add the token to every POST form that is not excluded by ExcludeRegexPaths():
 
 ~~~ html
 <input type="hidden" name="token" value="{{.token}}">
 ~~~
+
+Note: Any other POST operation needs to either include the token or be added to ExcludeRegexPaths().
 
 ## Working Example
 
 To see the example in action, use the following commands:
 ~~~
 go get github.com/josephspurrier/csrfbanana/example
-go run github.com/josephspurrier/csrfbanana/example
+go run src/github.com/josephspurrier/csrfbanana/example/example.go
 ~~~
 
 ## Major Contributions
