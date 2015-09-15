@@ -37,6 +37,9 @@ cs.ExcludeRegexPaths([]string{"/static(.*)"})
 // Set the token length (default is 32)
 csrfbanana.TokenLength = 32
 
+// Set the max number of tokens stored per session (default is 20)
+csrfbanana.MaxTokens = 20
+
 // Set the token name used in the forms and session (default is token)
 csrfbanana.TokenName = "token"
 
@@ -67,6 +70,34 @@ Add the token to every POST form that is not excluded by ExcludeRegexPaths():
 ~~~
 
 Note: Any other POST operation needs to either include the token or be added to ExcludeRegexPaths().
+
+## Multiple Forms on the Same Page
+
+To add tokens to multiple forms on the same page, use TokenWithPath() to specify the URL where the data will be submitted:
+
+~~~ go
+// Store token 1
+vars["token1"] = csrfbanana.TokenWithPage(w, r, sess, "/form1")
+
+// Store token 2
+vars["token2"] = csrfbanana.TokenWithPage(w, r, sess, "/form2")
+~~~
+
+Then insert the tokens into the template:
+
+~~~ html
+<!-- Form 1 -->
+<form method="post" action="/form1">
+...
+<input type="hidden" name="token" value="{{.token1}}">
+</form>
+
+<!-- Form 2 -->
+<form method="post" action="/form2">
+...
+<input type="hidden" name="token" value="{{.token2}}">
+</form>
+~~~
 
 ## Working Example
 
