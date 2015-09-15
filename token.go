@@ -14,6 +14,7 @@ package csrfbanana
 import (
 	"crypto/rand"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/sessions"
 )
@@ -94,9 +95,28 @@ func match(r *http.Request, sess *sessions.Session, refresh bool) bool {
 		path = "/"
 	}
 
+	// If tokens exists
 	if token, ok := sess.Values[TokenName]; ok {
-		if r.FormValue(TokenName) == token.(StringMap)[path] && r.FormValue(TokenName) != "" {
-			valid = true
+		// If token is empty in the form, it is not valid
+		if r.FormValue(TokenName) == "" {
+			valid = false
+		} else {
+			// Check token against same page URL
+			if r.FormValue(TokenName) == token.(StringMap)[path] {
+				valid = true
+			} else {
+				// Extract the relative referer path
+				offset := strings.Index(r.Referer(), r.Host) + len(r.Host)
+
+				// Make sure no errors can be thrown
+				if offset != 0 && offset < len(r.Referer()) {
+					// Check token against previous page
+					if r.FormValue(TokenName) == token.(StringMap)[r.Referer()[offset:]] {
+						valid = true
+					}
+				}
+
+			}
 		}
 
 		if refresh {

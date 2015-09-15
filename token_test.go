@@ -154,6 +154,78 @@ func TestMatch(t *testing.T) {
 	}
 }
 
+func TestMatchReferer(t *testing.T) {
+	var cookieName = "test"
+
+	// Create a cookiestore
+	store := sessions.NewCookieStore([]byte("secret-key"))
+
+	// Create the form
+	token := "123456"
+	form := url.Values{}
+	form.Set(TokenName, token)
+
+	// Create the POST request
+	req, err := http.NewRequest("POST", "http://localhost/login", bytes.NewBufferString(form.Encode()))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	// Pretend the page URL is /loginform
+	req.Header.Set("Referer", "http://localhost/loginform")
+
+	// Get the session
+	sess, err := store.Get(req, cookieName)
+	if err != nil {
+		t.Fatalf("Error getting session: %v", err)
+	}
+
+	// Set the values in the session manually
+	sess.Values[TokenName] = make(StringMap)
+	sess.Values[TokenName].(StringMap)["/loginform"] = "123456"
+
+	if ok := match(req, sess, true); !ok {
+		t.Error("Tokens do not match")
+	}
+}
+
+func TestMatchRefererFail(t *testing.T) {
+	var cookieName = "test"
+
+	// Create a cookiestore
+	store := sessions.NewCookieStore([]byte("secret-key"))
+
+	// Create the form
+	token := "123456"
+	form := url.Values{}
+	form.Set(TokenName, token)
+
+	// Create the POST request
+	req, err := http.NewRequest("POST", "http://localhost/login", bytes.NewBufferString(form.Encode()))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	// Pretend the page URL is /loginform, but the referrer is not set
+	//req.Header.Set("Referer", "http://localhost/loginform")
+
+	// Get the session
+	sess, err := store.Get(req, cookieName)
+	if err != nil {
+		t.Fatalf("Error getting session: %v", err)
+	}
+
+	// Set the values in the session manually
+	sess.Values[TokenName] = make(StringMap)
+	sess.Values[TokenName].(StringMap)["/loginform"] = "123456"
+
+	if ok := match(req, sess, true); ok {
+		t.Error("Tokens should not match")
+	}
+}
+
 func TestSingleTokenPerSession(t *testing.T) {
 	var cookieName = "test"
 
