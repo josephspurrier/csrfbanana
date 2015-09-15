@@ -6,6 +6,7 @@ package csrfbanana
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -74,6 +75,64 @@ func TestTokenWithPath(t *testing.T) {
 	token := TokenWithPath(w, r, sess, "/monkey")
 
 	if token != sess.Values[TokenName].(StringMap)["/monkey"] {
+		t.Errorf("Tokens do not match: expected %v, got %v", token, sess.Values[TokenName])
+	}
+}
+
+func TestTokenWithPathMaxTokens(t *testing.T) {
+	var cookieName = "test"
+
+	// Create a cookiestore
+	store := sessions.NewCookieStore([]byte("secret-key"))
+
+	// Create the recorder
+	w := httptest.NewRecorder()
+
+	// Create the request
+	r := fakeGet()
+
+	// Get the session
+	sess, err := store.Get(r, cookieName)
+	if err != nil {
+		t.Fatalf("Error getting session: %v", err)
+	}
+
+	for i := 0; i < MaxTokens; i++ {
+		TokenWithPath(w, r, sess, "/monkey"+fmt.Sprintf("%v", i))
+	}
+
+	token := TokenWithPath(w, r, sess, "/monkey")
+
+	if token != sess.Values[TokenName].(StringMap)["/monkey"] {
+		t.Errorf("Tokens do not match: expected %v, got %v", token, sess.Values[TokenName])
+	}
+}
+
+func TestTokenMaxTokens(t *testing.T) {
+	var cookieName = "test"
+
+	// Create a cookiestore
+	store := sessions.NewCookieStore([]byte("secret-key"))
+
+	// Create the recorder
+	w := httptest.NewRecorder()
+
+	// Create the request
+	r := fakeGet()
+
+	// Get the session
+	sess, err := store.Get(r, cookieName)
+	if err != nil {
+		t.Fatalf("Error getting session: %v", err)
+	}
+
+	for i := 0; i < MaxTokens; i++ {
+		TokenWithPath(w, r, sess, "/monkey"+fmt.Sprintf("%v", i))
+	}
+
+	token := Token(w, r, sess)
+
+	if token != sess.Values[TokenName].(StringMap)["/"] {
 		t.Errorf("Tokens do not match: expected %v, got %v", token, sess.Values[TokenName])
 	}
 }
