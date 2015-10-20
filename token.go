@@ -13,6 +13,8 @@ package csrfbanana
 
 import (
 	"crypto/rand"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -112,12 +114,38 @@ func match(r *http.Request, sess *sessions.Session, refresh bool) bool {
 
 	// If tokens exists
 	if token, ok := sess.Values[TokenName]; ok {
+
+		// Token submitted via POST
+		sentToken := ""
+
+		// Detect the content type
+		switch r.Header.Get("Content-Type") {
+		case "application/x-www-form-urlencoded":
+			sentToken = r.FormValue(TokenName)
+			break
+		case "application/json":
+			// Prevents throwing an error if nil
+			if r.Body == nil {
+				break
+			}
+			var t interface{}
+			decoder := json.NewDecoder(r.Body)
+			err := decoder.Decode(&t)
+			// If the response is JSON
+			if err == nil {
+				vals := t.(map[string]interface{})
+				// Update the token value
+				sentToken = fmt.Sprintf("%v", vals[TokenName])
+			}
+			break
+		}
+
 		// If token is empty in the form, it is not valid
-		if r.FormValue(TokenName) == "" {
+		if sentToken == "" {
 			valid = false
 		} else {
 			// Check token against same page URL
-			if r.FormValue(TokenName) == token.(StringMap)[path] {
+			if sentToken == token.(StringMap)[path] {
 				valid = true
 			} else {
 				// Extract the relative referer path
@@ -126,7 +154,7 @@ func match(r *http.Request, sess *sessions.Session, refresh bool) bool {
 				// Make sure no errors can be thrown
 				if offset != 0 && offset < len(r.Referer()) {
 					// Check token against previous page
-					if r.FormValue(TokenName) == token.(StringMap)[r.Referer()[offset:]] {
+					if sentToken == token.(StringMap)[r.Referer()[offset:]] {
 						valid = true
 					}
 				}
