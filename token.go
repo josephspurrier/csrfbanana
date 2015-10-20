@@ -116,7 +116,7 @@ func match(r *http.Request, sess *sessions.Session, refresh bool) bool {
 	if token, ok := sess.Values[TokenName]; ok {
 
 		// Token submitted via POST
-		sentToken := ""
+		sentToken := r.FormValue(TokenName)
 
 		// Detect the content type
 		switch r.Header.Get("Content-Type") {
