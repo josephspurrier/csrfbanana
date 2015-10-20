@@ -69,6 +69,51 @@ func TestCSRF(t *testing.T) {
 	}
 }
 
+func TestCSRFJSON(t *testing.T) {
+	var cookieName = "test"
+
+	// Create a cookiestore
+	store := sessions.NewCookieStore([]byte("secret-key"))
+
+	// Create the recorder
+	w := httptest.NewRecorder()
+
+	// Create the handler
+	h := New(http.HandlerFunc(successHandler), store, cookieName)
+
+	// Create the form
+	token := "123456"
+	form := url.Values{}
+	form.Set(TokenName, token)
+
+	jsonValue := `{"token": "` + token + `"}`
+
+	// Create the POST request
+	req, err := http.NewRequest("POST", "http://localhost/", bytes.NewBufferString(jsonValue))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// Get the session
+	sess, err := store.Get(req, cookieName)
+	if err != nil {
+		t.Fatalf("Error getting session: %v", err)
+	}
+
+	// Set the values in the session manually
+	sess.Values[TokenName] = make(StringMap)
+	sess.Values[TokenName].(StringMap)["/"] = "123456"
+
+	// Run the page
+	h.ServeHTTP(w, req)
+
+	if w.Code != 200 {
+		t.Errorf("The request should have succeeded, but it didn't. Instead, the code was %d",
+			w.Code)
+	}
+}
+
 func TestCSRFMissingToken(t *testing.T) {
 	var cookieName = "test"
 
@@ -87,6 +132,88 @@ func TestCSRFMissingToken(t *testing.T) {
 		panic(err)
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	// Get the session
+	sess, err := store.Get(req, cookieName)
+	if err != nil {
+		t.Fatalf("Error getting session: %v", err)
+	}
+
+	// Set the values in the session manually
+	sess.Values[TokenName] = make(StringMap)
+
+	// Run the page
+	h.ServeHTTP(w, req)
+
+	if w.Code == 200 {
+		t.Errorf("The request should have failed, but it didn't. Instead, the code was %d",
+			w.Code)
+	}
+}
+
+func TestCSRFMissingTokenJSON(t *testing.T) {
+	var cookieName = "test"
+
+	// Create a cookiestore
+	store := sessions.NewCookieStore([]byte("secret-key"))
+
+	// Create the recorder
+	w := httptest.NewRecorder()
+
+	// Create the handler
+	h := New(http.HandlerFunc(successHandler), store, cookieName)
+
+	// Create the form
+	token := "123456"
+	form := url.Values{}
+	form.Set(TokenName, token)
+
+	jsonValue := `{"token2": "` + token + `"}`
+
+	// Create the POST request
+	req, err := http.NewRequest("POST", "http://localhost/", bytes.NewBufferString(jsonValue))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// Get the session
+	sess, err := store.Get(req, cookieName)
+	if err != nil {
+		t.Fatalf("Error getting session: %v", err)
+	}
+
+	// Set the values in the session manually
+	sess.Values[TokenName] = make(StringMap)
+	sess.Values[TokenName].(StringMap)["/"] = "123456"
+
+	// Run the page
+	h.ServeHTTP(w, req)
+
+	if w.Code == 200 {
+		t.Errorf("The request should have failed, but it didn't. Instead, the code was %d",
+			w.Code)
+	}
+}
+
+func TestCSRFMissingTokenJSONNoPayload(t *testing.T) {
+	var cookieName = "test"
+
+	// Create a cookiestore
+	store := sessions.NewCookieStore([]byte("secret-key"))
+
+	// Create the recorder
+	w := httptest.NewRecorder()
+
+	// Create the handler
+	h := New(http.HandlerFunc(successHandler), store, cookieName)
+
+	// Create the POST request with no token
+	req, err := http.NewRequest("POST", "http://localhost/", nil)
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
 
 	// Get the session
 	sess, err := store.Get(req, cookieName)
