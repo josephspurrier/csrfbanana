@@ -25,7 +25,7 @@ type CSRFHandler struct {
 	perRequest           int
 	regenerateAfterUsage bool
 	excludeRegexPaths    []*regexp.Regexp
-	store                *sessions.CookieStore
+	store                sessions.Store
 	sessionName          string
 	nextHandler          http.Handler
 }
@@ -41,7 +41,7 @@ func init() {
 }
 
 // New can be used as middleware because it returns an http.HandlerFunc
-func New(next http.Handler, sessStore *sessions.CookieStore, sessName string) *CSRFHandler {
+func New(next http.Handler, sessStore sessions.Store, sessName string) *CSRFHandler {
 	cs := &CSRFHandler{}
 	cs.nextHandler = next
 	cs.failureHandler = http.HandlerFunc(defaultFailureHandler)
