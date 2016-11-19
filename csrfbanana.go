@@ -104,17 +104,13 @@ func (h *CSRFHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// If method is POST, PUT, or DELETE
 		if !sContains(safeMethods, r.Method) {
-
 			// Determine if the token matches
 			isMatch = match(r, sess, h.regenerateAfterUsage)
 		}
 
-		// Save the session
-		sess.Save(r, w)
-
 		// If the token does NOT match
 		if !isMatch {
-			// Server the Failure Handler
+			// Serve the Failure Handler
 			h.failureHandler.ServeHTTP(w, r)
 			return
 		}
