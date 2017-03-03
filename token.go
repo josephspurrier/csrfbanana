@@ -12,9 +12,12 @@ package csrfbanana
 // Revel: https://github.com/cbonello/revel-csrf
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -125,11 +128,13 @@ func match(r *http.Request, sess *sessions.Session, refresh bool) bool {
 			break
 		case "application/json":
 			// Prevents throwing an error if nil
-			if r.Body == nil {
+			b := bytes.NewBuffer(make([]byte, 0))
+			body_reader := io.TeeReader(r.Body, b)
+			if body_reader == nil {
 				break
 			}
 			var t interface{}
-			decoder := json.NewDecoder(r.Body)
+			decoder := json.NewDecoder(body_reader)
 			err := decoder.Decode(&t)
 			// If the response is JSON
 			if err == nil {
@@ -137,6 +142,7 @@ func match(r *http.Request, sess *sessions.Session, refresh bool) bool {
 				// Update the token value
 				sentToken = fmt.Sprintf("%v", vals[TokenName])
 			}
+			r.Body = ioutil.NopCloser(b)
 			break
 		}
 
