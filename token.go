@@ -130,12 +130,13 @@ func match(r *http.Request, sess *sessions.Session, refresh bool) bool {
 			// Prevents throwing an error if nil
 			b := bytes.NewBuffer(make([]byte, 0))
 			body_reader := io.TeeReader(r.Body, b)
-			if body_reader == nil {
+			if r.Body == nil {
 				break
 			}
 			var t interface{}
 			decoder := json.NewDecoder(body_reader)
 			err := decoder.Decode(&t)
+
 			// If the response is JSON
 			if err == nil {
 				vals := t.(map[string]interface{})
