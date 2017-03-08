@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"testing"
 
+	"encoding/json"
 	"github.com/gorilla/sessions"
 )
 
@@ -111,6 +112,16 @@ func TestCSRFJSON(t *testing.T) {
 	if w.Code != 200 {
 		t.Errorf("The request should have succeeded, but it didn't. Instead, the code was %d",
 			w.Code)
+	}
+
+	p := struct {
+		Token string `json:"token"`
+	}{}
+
+	json.NewDecoder(req.Body).Decode(&p)
+	if p.Token != token {
+		t.Errorf("The body should have attributes, but it didn't. Instead, the body was %s",
+			req.Body)
 	}
 }
 
