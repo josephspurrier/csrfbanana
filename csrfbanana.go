@@ -1,7 +1,3 @@
-// Copyright 2015 Joseph Spurrier
-// Author: Joseph Spurrier (http://josephspurrier.com)
-// License: http://www.apache.org/licenses/LICENSE-2.0.html
-
 // Package csrfbanana creates a token to protect against CSRF attacks
 package csrfbanana
 
