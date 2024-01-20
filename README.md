@@ -77,10 +77,10 @@ To add tokens to multiple forms on the same page, use TokenWithPath() to specify
 
 ~~~ go
 // Store token 1
-vars["token1"] = csrfbanana.TokenWithPage(w, r, sess, "/form1")
+vars["token1"] = csrfbanana.TokenWithPath(w, r, sess, "/form1")
 
 // Store token 2
-vars["token2"] = csrfbanana.TokenWithPage(w, r, sess, "/form2")
+vars["token2"] = csrfbanana.TokenWithPath(w, r, sess, "/form2")
 ~~~
 
 Then insert the tokens into the template:
